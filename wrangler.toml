@@ -1,0 +1,36 @@
+# PolyMesh Gateway — Cloudflare Worker (PM-G v1)
+name = "polymesh-gateway"
+main = "src/index.ts"
+compatibility_date = "2025-07-01"
+compatibility_flags = ["nodejs_compat"]
+
+[vars]
+RATE_LIMIT_PER_MINUTE = "100"
+
+# D1: meshes, agents, invites, envelope_log (migrations/001_init.sql)
+[[d1_databases]]
+binding = "PM_DB"
+database_name = "pm-gateway"
+database_id = "local-dev-placeholder"
+migrations_dir = "migrations"
+
+# One Durable Object instance per mesh_id (live routing + ring buffer)
+[[durable_objects.bindings]]
+name = "MESH_DO"
+class_name = "MeshDO"
+
+[[migrations]]
+tag = "v1"
+new_classes = ["MeshDO"]
+
+# ─── HTTP routes (Worker fetch router in src/index.ts) ───────────────────────
+# GET  /health | /api/v1/health          — liveness
+# POST /api/v1/agents                    — register agent (+ personal mesh)
+# GET  /api/v1/agents/:id/card           — public AgentCard
+# POST /api/v1/auth/token                — API key → JWT
+# POST /api/v1/meshes                    — create mesh + invite
+# GET  /api/v1/meshes/:id/agents         — list AgentCards (?capability=)
+# POST /api/v1/meshes/:id/join           — join via invite code
+# POST /api/v1/meshes/:id/invite         — create invite (owner)
+# GET  /api/v1/ws?token=&mesh=           — WebSocket upgrade → MeshDO
+# Custom domains: CF Dashboard → Workers → Triggers → Custom Domain

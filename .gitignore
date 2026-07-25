@@ -1,5 +1,9 @@
 node_modules/
 dist/
 .env
+.dev.vars
+.wrangler/
 *.log
-wrangler.toml
+*.tsbuildinfo
+coverage/
+.DS_Store

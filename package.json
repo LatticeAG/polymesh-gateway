@@ -9,11 +9,20 @@
     "test": "vitest run",
     "typecheck": "tsc --noEmit"
   },
-  "dependencies": {},
+  "dependencies": {
+    "bcryptjs": "^3.0.3",
+    "itty-router": "^5.0.24",
+    "jose": "^6.2.4"
+  },
   "devDependencies": {
     "@cloudflare/workers-types": "^4.20250401.0",
+    "@types/bcryptjs": "^2.4.6",
+    "@types/node": "^26.1.1",
     "typescript": "^5.8.3",
     "vitest": "^3.2.4",
     "wrangler": "^4.0.0"
+  },
+  "overrides": {
+    "@cloudflare/workers-types": "$@cloudflare/workers-types"
   }
 }

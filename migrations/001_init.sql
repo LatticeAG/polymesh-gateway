@@ -1,3 +1,5 @@
+-- PolyMesh Gateway D1 schema (SPEC §8.3)
+
 CREATE TABLE IF NOT EXISTS meshes (
   id TEXT PRIMARY KEY,
   name TEXT NOT NULL UNIQUE,
@@ -5,6 +7,7 @@ CREATE TABLE IF NOT EXISTS meshes (
   created_at TEXT NOT NULL DEFAULT (datetime('now')),
   is_public INTEGER NOT NULL DEFAULT 0
 );
+
 CREATE TABLE IF NOT EXISTS agents (
   id TEXT PRIMARY KEY,
   mesh_id TEXT NOT NULL,
@@ -15,6 +18,7 @@ CREATE TABLE IF NOT EXISTS agents (
   last_seen_at TEXT,
   FOREIGN KEY (mesh_id) REFERENCES meshes(id)
 );
+
 CREATE TABLE IF NOT EXISTS invites (
   code TEXT PRIMARY KEY,
   mesh_id TEXT NOT NULL,
@@ -24,6 +28,7 @@ CREATE TABLE IF NOT EXISTS invites (
   expires_at TEXT,
   FOREIGN KEY (mesh_id) REFERENCES meshes(id)
 );
+
 CREATE TABLE IF NOT EXISTS envelope_log (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
   mesh_id TEXT NOT NULL,
@@ -35,6 +40,8 @@ CREATE TABLE IF NOT EXISTS envelope_log (
   payload_size INTEGER,
   created_at TEXT NOT NULL DEFAULT (datetime('now'))
 );
+
 CREATE INDEX IF NOT EXISTS idx_agents_mesh ON agents(mesh_id);
+CREATE INDEX IF NOT EXISTS idx_invites_mesh ON invites(mesh_id);
 CREATE INDEX IF NOT EXISTS idx_envelope_mesh ON envelope_log(mesh_id);
 CREATE INDEX IF NOT EXISTS idx_envelope_task ON envelope_log(task_id);
