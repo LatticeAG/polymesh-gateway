@@ -1668,7 +1668,7 @@ Content-Type: application/json
   - WS: require `Origin` header ∈ allowlist; else `403`.
 - Non-browser agents may omit Origin; allow if `ALLOWED_ORIGINS` unset.
 
-### 12.7 Invite Code Entropy
+### 12.8 Invite Code Entropy
 
 - Suffix: 6 chars from 32-symbol alphabet → \(32^6 ≈ 2^{30}\) space.
 - Prefix is cosmetic, not secret.
