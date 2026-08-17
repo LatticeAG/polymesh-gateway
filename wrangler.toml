@@ -11,7 +11,7 @@ RATE_LIMIT_PER_MINUTE = "100"
 [[d1_databases]]
 binding = "PM_DB"
 database_name = "pm-gateway"
-database_id = "local-dev-placeholder"
+database_id = "c86ad108-d8fb-412d-87b7-397583d28fdc"
 migrations_dir = "migrations"
 
 # One Durable Object instance per mesh_id (live routing + ring buffer)
@@ -21,7 +21,7 @@ class_name = "MeshDO"
 
 [[migrations]]
 tag = "v1"
-new_classes = ["MeshDO"]
+new_sqlite_classes = ["MeshDO"]
 
 # ─── HTTP routes (Worker fetch router in src/index.ts) ───────────────────────
 # GET  /health | /api/v1/health          — liveness
