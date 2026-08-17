@@ -7,3 +7,12 @@ dist/
 *.tsbuildinfo
 coverage/
 .DS_Store
+
+# Internal planning docs (IP protection)
+SPEC*.md
+BUILD-SPEC*.md
+HANDOFF*.md
+ROADMAP*.md
+REVIEW*.md
+WHAT-NEXT*.md
+ARCHITECTURE*.md
