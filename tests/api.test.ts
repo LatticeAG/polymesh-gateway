@@ -47,6 +47,33 @@ describe("POST /api/v1/agents", () => {
     expect(fake.agents.size).toBe(1);
   });
 
+  it("stores capabilities passed at registration in the agent card", async () => {
+    const fake = new FakeD1();
+    const env = makeTestEnv(fake);
+    const res = await handleCreateAgent(
+      jsonRequest("https://gw/agents", "POST", {
+        display_name: "CapAgent",
+        capabilities: [
+          { name: "calendar.check", schema: { input: {}, output: {} } },
+          "echo",
+        ],
+      }),
+      env,
+    );
+    expect(res.status).toBe(201);
+    const body = await readJson<{ agent_id: string }>(res);
+    const card = await handleGetAgentCard(
+      jsonRequest(`https://gw/agents/${body.agent_id}/card`, "GET"),
+      env,
+      body.agent_id,
+    );
+    const cardBody = await readJson<{ capabilities: unknown[] }>(card);
+    expect(cardBody.capabilities).toEqual([
+      { name: "calendar.check", schema: { input: {}, output: {} } },
+      { name: "echo" },
+    ]);
+  });
+
   it("rejects missing display_name", async () => {
     const env = makeTestEnv(new FakeD1());
     const res = await handleCreateAgent(

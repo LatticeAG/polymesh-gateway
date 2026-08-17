@@ -92,6 +92,7 @@ export interface CreateAgentRequest {
   display_name: string;
   mesh_id?: string;
   psk?: string;
+  capabilities?: string[];
 }
 
 export interface CreateAgentResponse {

@@ -74,6 +74,27 @@ export default {
     env: Env,
     ctx: ExecutionContext,
   ): Promise<Response> {
+    // WebSocket upgrades must be returned raw: the DO's 101+webSocket
+    // response cannot be re-constructed (withCors would throw "status
+    // codes in the range 200 to 599" - see workerd#3047). Detect the
+    // upgrade BEFORE the router and hand it straight back.
+    const url = new URL(request.url);
+    if (
+      url.pathname === "/api/v1/ws" &&
+      (request.headers.get("Upgrade") ?? "").toLowerCase() === "websocket"
+    ) {
+      try {
+        return await handleWsUpgrade(request, env);
+      } catch (e) {
+        console.error("Unhandled gateway error", e);
+        return errorResponse(
+          "internal_error",
+          e instanceof Error ? e.message : "Internal server error",
+          500,
+        );
+      }
+    }
+
     try {
       const response = await router.fetch(request, env, ctx);
       return withCors(response);

@@ -6,6 +6,7 @@ import {
 } from "../auth";
 import { Db, agentToCard } from "../db/schema";
 import type {
+  Capability,
   CreateAgentRequest,
   CreateAgentResponse,
   Env,
@@ -30,6 +31,44 @@ function constantTimeCompare(a: string, b: string): boolean {
     mismatch |= aCode ^ bCode;
   }
   return mismatch === 0;
+}
+
+/**
+ * Normalize the capabilities field of an agent-creation request into the
+ * Capability[] shape stored on the AgentCard (SPEC §9). Accepts both the
+ * canonical object form ({name, schema?, scope?, security?}) and plain
+ * strings ("echo" -> {name: "echo"}) for ergonomics. Unparseable entries
+ * are dropped.
+ */
+function normalizeCapabilities(raw: unknown): Capability[] {
+  if (!Array.isArray(raw)) {
+    return [];
+  }
+  const out: Capability[] = [];
+  for (const entry of raw) {
+    if (typeof entry === "string" && entry.trim()) {
+      out.push({ name: entry.trim().slice(0, 128) });
+    } else if (
+      entry &&
+      typeof entry === "object" &&
+      typeof (entry as { name?: unknown }).name === "string" &&
+      (entry as { name: string }).name.trim()
+    ) {
+      const name = (entry as { name: string }).name.trim().slice(0, 128);
+      const cap: Capability = { name };
+      if (typeof (entry as { schema?: unknown }).schema !== "undefined") {
+        cap.schema = (entry as { schema?: unknown }).schema;
+      }
+      if (typeof (entry as { scope?: unknown }).scope === "string") {
+        cap.scope = (entry as { scope: string }).scope;
+      }
+      if (typeof (entry as { security?: unknown }).security === "string") {
+        cap.security = (entry as { security: string }).security;
+      }
+      out.push(cap);
+    }
+  }
+  return out;
 }
 
 export async function handleCreateAgent(
@@ -119,6 +158,7 @@ export async function handleCreateAgent(
       mesh_id: meshId,
       display_name: displayName,
       api_key_hash: storedHash,
+      capabilities: normalizeCapabilities(body.capabilities),
     });
   } catch (e) {
     const msg = e instanceof Error ? e.message : "create failed";
