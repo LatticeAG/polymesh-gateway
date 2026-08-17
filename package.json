@@ -1,5 +1,5 @@
 {
-  "name": "polymesh-gateway",
+  "name": "@latticeag/polymesh-gateway",
   "version": "1.0.0",
   "description": "CF Workers relay platform for agent meshes",
   "main": "src/index.ts",
