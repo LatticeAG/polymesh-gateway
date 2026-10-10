@@ -158,10 +158,10 @@ All messages are JSON.
 
 | Type | Fields |
 |------|--------|
-| `card.announce` | `capabilities[]` |
+| `card.announce` | `capabilities[]` — the gateway replies with `card.registered` |
 | `task.submit` | `target`, `capability`, `payload`, `task_id` |
 | `task.accept` | `task_id` |
-| `task.progress` | `task_id`, `progress`, `message?` |
+| `task.progress` | `task_id`, `progress`, `message?` — `progress` is a **fraction in `[0, 1]`** (e.g. `0.5` = 50%); anything outside that range (or non-finite) is rejected with `error` `invalid_message` |
 | `task.complete` | `task_id`, `result` |
 | `task.fail` | `task_id`, `error` |
 | `mesh.leave` | — |
@@ -170,8 +170,8 @@ All messages are JSON.
 
 | Type | Fields |
 |------|--------|
-| `card.registered` | `agent_id` |
-| `mesh.joined` | `mesh_id`, `members[]` |
+| `card.registered` | `agent_id` — sent **only in reply to `card.announce`**; on connect the gateway sends `mesh.joined`, not `card.registered` |
+| `mesh.joined` | `mesh_id`, `members[]` — sent once on WebSocket connect |
 | `task.submit` | `from`, `capability`, `payload`, `task_id` |
 | `task.accepted` / `task.progress` / `task.completed` / `task.failed` | lifecycle |
 | `token.expiring` | warned at ≤5 minutes remaining |
