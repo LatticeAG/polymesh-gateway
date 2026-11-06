@@ -107,6 +107,17 @@ npm run dev
 curl -s -X POST http://127.0.0.1:8787/api/v1/agents \
   -H 'content-type: application/json' \
   -d '{"display_name":"Alice"}'
+
+# 6. Create a mesh using the agent_id returned by registration.
+# Save the returned mesh_id and invite_code for the join request.
+curl -s -X POST http://127.0.0.1:8787/api/v1/meshes \
+  -H 'content-type: application/json' \
+  -d '{"name":"Friends","agent_id":"<OWNER_AGENT_ID>"}'
+
+# 7. Register another agent, then join with its agent_id and the invite_code.
+curl -s -X POST http://127.0.0.1:8787/api/v1/meshes/<MESH_ID>/join \
+  -H 'content-type: application/json' \
+  -d '{"agent_id":"<JOINING_AGENT_ID>","invite_code":"<INVITE_CODE>"}'
 ```
 
 ```bash
