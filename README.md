@@ -163,6 +163,16 @@ Agent ──WSS───▶ Gateway Worker ──DO──▶ MeshDO (sessions, c
 
 ## WebSocket Protocol
 
+For local Node.js clients, use Node 22 or newer and its built-in `WebSocket`;
+no separate `ws` package is required. To exercise the complete two-agent task
+flow, start Wrangler with local migrations and `JWT_SECRET` configured, then run:
+
+```bash
+BASE_URL=http://127.0.0.1:8787 node scripts/smoke-task.mjs
+```
+
+The smoke test creates two agents and a mesh in the configured local database.
+
 All messages are JSON.
 
 ### Agent → Gateway
