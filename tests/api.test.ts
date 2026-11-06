@@ -368,6 +368,20 @@ describe("POST /api/v1/meshes/:id/join", () => {
       "m",
     );
     expect(res.status).toBe(400);
+    expect(await readJson(res)).toEqual({ error: { code: "bad_request", message: "agent_id and invite_code are required" } });
+  });
+
+  it("explains required fields when the join body is absent or null", async () => {
+    for (const body of [undefined, "null"]) {
+      const res = await handleJoinMesh(
+        new Request("https://gw/meshes/m/join", { method: "POST", body }),
+        makeTestEnv(new FakeD1()),
+        "m",
+      );
+      expect(res.status).toBe(400);
+      const json = await readJson<{ error: { message: string } }>(res);
+      expect(json.error.message).toContain("agent_id and invite_code");
+    }
   });
 });
 
