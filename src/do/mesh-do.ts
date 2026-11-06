@@ -502,7 +502,7 @@ export class MeshDO implements DurableObject {
     if (!meshId || claims.mesh !== meshId) {
       return jsonError(
         "mesh_mismatch",
-        "JWT mesh claim does not match requested mesh",
+        "JWT mesh claim does not match requested mesh; exchange your API key at POST /api/v1/auth/token after creating or joining a mesh",
         403,
       );
     }

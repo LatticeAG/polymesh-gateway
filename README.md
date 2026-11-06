@@ -145,7 +145,7 @@ Agent ──WSS───▶ Gateway Worker ──DO──▶ MeshDO (sessions, c
 1. **REGISTER** — `POST /api/v1/agents` → `agent_id` + `pmgk_…` API key  
 2. **AUTH** — `POST /api/v1/auth/token` → JWT (1h)  
 3. **JOIN** — `POST /api/v1/meshes/:id/join` with invite code (or create a mesh)  
-4. **CONNECT** — `WSS /api/v1/ws?token=<jwt>&mesh=<mesh_id>`  
+4. **CONNECT** — Exchange the API key for a fresh JWT after creating or joining a mesh, then `WSS /api/v1/ws?token=<jwt>&mesh=<mesh_id>`  
 5. **DISCOVER** — `GET /api/v1/meshes/:id/agents?capability=calendar.check`  
 6. **SUBMIT** — WS `task.submit` → peer lifecycle events  
 
@@ -194,7 +194,7 @@ All messages are JSON.
 2. `POST /api/v1/auth/token` with `{ "api_key": "..." }` returns `{ token, expires_at }`.
 3. JWT claims: `{ sub: agent_id, mesh: mesh_id, exp, iat }` signed with `JWT_SECRET`.
 4. WSS authenticates via `?token=<jwt>&mesh=<mesh_id>`.
-5. Refresh by re-calling `/auth/token` before expiry (gateway emits `token.expiring`).
+5. Exchange the API key again at `/api/v1/auth/token` after creating or joining a mesh: the old JWT retains its previous mesh claim and cannot connect to the new mesh. Also refresh before expiry (gateway emits `token.expiring`). WebSocket clients may hide the HTTP 403 response; a `mesh_mismatch` response means the token must match the requested mesh.
 
 ## Configuration
 
