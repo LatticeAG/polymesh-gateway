@@ -107,6 +107,17 @@ npm run dev
 curl -s -X POST http://127.0.0.1:8787/api/v1/agents \
   -H 'content-type: application/json' \
   -d '{"display_name":"Alice"}'
+
+# 6. Create a mesh using the agent_id returned by registration.
+# Save the returned mesh_id and invite_code for the join request.
+curl -s -X POST http://127.0.0.1:8787/api/v1/meshes \
+  -H 'content-type: application/json' \
+  -d '{"name":"Friends","agent_id":"<OWNER_AGENT_ID>"}'
+
+# 7. Register another agent, then join with its agent_id and the invite_code.
+curl -s -X POST http://127.0.0.1:8787/api/v1/meshes/<MESH_ID>/join \
+  -H 'content-type: application/json' \
+  -d '{"agent_id":"<JOINING_AGENT_ID>","invite_code":"<INVITE_CODE>"}'
 ```
 
 ```bash
@@ -134,7 +145,7 @@ Agent ──WSS───▶ Gateway Worker ──DO──▶ MeshDO (sessions, c
 1. **REGISTER** — `POST /api/v1/agents` → `agent_id` + `pmgk_…` API key  
 2. **AUTH** — `POST /api/v1/auth/token` → JWT (1h)  
 3. **JOIN** — `POST /api/v1/meshes/:id/join` with invite code (or create a mesh)  
-4. **CONNECT** — `WSS /api/v1/ws?token=<jwt>&mesh=<mesh_id>`  
+4. **CONNECT** — Exchange the API key for a fresh JWT after creating or joining a mesh, then `WSS /api/v1/ws?token=<jwt>&mesh=<mesh_id>`  
 5. **DISCOVER** — `GET /api/v1/meshes/:id/agents?capability=calendar.check`  
 6. **SUBMIT** — WS `task.submit` → peer lifecycle events  
 
@@ -151,6 +162,16 @@ Agent ──WSS───▶ Gateway Worker ──DO──▶ MeshDO (sessions, c
 | `POST` | `/api/v1/meshes/:id/invite` | Create invite (owner + JWT or `api_key`) |
 
 ## WebSocket Protocol
+
+For local Node.js clients, use Node 22 or newer and its built-in `WebSocket`;
+no separate `ws` package is required. To exercise the complete two-agent task
+flow, start Wrangler with local migrations and `JWT_SECRET` configured, then run:
+
+```bash
+BASE_URL=http://127.0.0.1:8787 node scripts/smoke-task.mjs
+```
+
+The smoke test creates two agents and a mesh in the configured local database.
 
 All messages are JSON.
 
@@ -183,7 +204,7 @@ All messages are JSON.
 2. `POST /api/v1/auth/token` with `{ "api_key": "..." }` returns `{ token, expires_at }`.
 3. JWT claims: `{ sub: agent_id, mesh: mesh_id, exp, iat }` signed with `JWT_SECRET`.
 4. WSS authenticates via `?token=<jwt>&mesh=<mesh_id>`.
-5. Refresh by re-calling `/auth/token` before expiry (gateway emits `token.expiring`).
+5. Exchange the API key again at `/api/v1/auth/token` after creating or joining a mesh: the old JWT retains its previous mesh claim and cannot connect to the new mesh. Also refresh before expiry (gateway emits `token.expiring`). WebSocket clients may hide the HTTP 403 response; a `mesh_mismatch` response means the token must match the requested mesh.
 
 ## Configuration
 

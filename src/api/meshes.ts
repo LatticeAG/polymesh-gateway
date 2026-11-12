@@ -220,12 +220,15 @@ export async function handleJoinMesh(
     const err = e as { message?: string; status?: number; code?: string };
     return errorResponse(
       err.code ?? "bad_request",
-      err.message ?? "Invalid body",
+      err.message === "Request body is required"
+        ? "JSON body with agent_id and invite_code is required"
+        : err.message ?? "Invalid body",
       err.status ?? 400,
     );
   }
 
-  if (!body.agent_id || !body.invite_code) {
+  if (!body || typeof body.agent_id !== "string" || !body.agent_id.trim() ||
+      typeof body.invite_code !== "string" || !body.invite_code.trim()) {
     return errorResponse(
       "bad_request",
       "agent_id and invite_code are required",
